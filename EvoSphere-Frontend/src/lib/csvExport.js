@@ -26,10 +26,13 @@ export const exportToCSV = (data, filename = 'export.csv') => {
         return `"${stringValue}"`;
       }).join(',')
     )
-  ].join('\n');
+  ].join('\r\n');
+
+  // Include Unicode BOM so Excel recognizes UTF-8 correctly
+  const csvWithBom = '\uFEFF' + csvContent;
 
   // Create and download blob
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob([csvWithBom], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
   

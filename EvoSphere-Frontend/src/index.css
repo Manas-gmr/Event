@@ -4,64 +4,64 @@
 
 @layer base {
   :root {
-    --background: 221 26% 8%;
-    --foreground: 210 18% 96%;
-    --card: 221 28% 13%;
-    --card-foreground: 210 18% 96%;
-    --popover: 221 28% 17%;
-    --popover-foreground: 210 18% 96%;
-    --primary: 282 85% 68%;
+    --background: 0 0% 98%;
+    --foreground: 220 15% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
+    --primary: 212 95% 42%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 206 40% 16%;
-    --secondary-foreground: 210 18% 96%;
-    --muted: 220 20% 70%;
-    --muted-foreground: 210 16% 72%;
-    --accent: 183 100% 58%;
-    --accent-foreground: 220 20% 8%;
-    --destructive: 348 88% 64%;
+    --secondary: 262 88% 64%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 12% 55%;
+    --muted-foreground: 220 12% 35%;
+    --accent: 173 100% 41%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 348 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 222 24% 20%;
-    --input: 222 24% 18%;
-    --ring: 183 100% 58%;
+    --border: 220 14% 90%;
+    --input: 220 14% 96%;
+    --ring: 212 95% 42%;
     --radius: 0.75rem;
 
-    --surface: 221 28% 16%;
-    --surface2: 222 24% 20%;
-    --ev-amber: 45 100% 58%;
-    --ev-green: 162 92% 55%;
-    --ev-red: 348 88% 64%;
-    --ev-purple: 282 85% 68%;
-    --ev-teal: 183 100% 58%;
+    --surface: 0 0% 100%;
+    --surface2: 217 16% 96%;
+    --ev-amber: 42 96% 55%;
+    --ev-green: 164 88% 48%;
+    --ev-red: 348 88% 54%;
+    --ev-purple: 252 90% 64%;
+    --ev-teal: 178 100% 45%;
   }
 
-  .light {
-    --background: 0 0% 98%;
-    --foreground: 210 20% 12%;
-    --card: 0 0% 100%;
-    --card-foreground: 210 20% 12%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 20% 12%;
-    --primary: 282 85% 58%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 206 40% 85%;
-    --secondary-foreground: 210 20% 12%;
-    --muted: 220 20% 40%;
-    --muted-foreground: 210 20% 45%;
-    --accent: 183 100% 48%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 348 88% 54%;
+  .dark {
+    --background: 220 16% 10%;
+    --foreground: 210 22% 94%;
+    --card: 218 22% 14%;
+    --card-foreground: 210 22% 94%;
+    --popover: 218 22% 18%;
+    --popover-foreground: 210 22% 94%;
+    --primary: 212 85% 62%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 212 80% 72%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 220 10% 64%;
+    --muted-foreground: 210 16% 80%;
+    --accent: 173 100% 64%;
+    --accent-foreground: 220 20% 8%;
+    --destructive: 348 84% 68%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 20% 88%;
-    --input: 220 20% 92%;
-    --ring: 183 100% 48%;
+    --border: 220 14% 26%;
+    --input: 220 14% 18%;
+    --ring: 173 100% 64%;
 
-    --surface: 0 0% 100%;
-    --surface2: 220 20% 94%;
-    --ev-amber: 45 100% 50%;
-    --ev-green: 162 92% 45%;
-    --ev-red: 348 88% 54%;
-    --ev-purple: 282 85% 58%;
-    --ev-teal: 183 100% 48%;
+    --surface: 216 24% 12%;
+    --surface2: 218 22% 16%;
+    --ev-amber: 43 100% 58%;
+    --ev-green: 162 92% 55%;
+    --ev-red: 348 88% 64%;
+    --ev-purple: 252 90% 64%;
+    --ev-teal: 178 100% 58%;
   }
 }
 
@@ -71,35 +71,18 @@
   }
 
   html {
-    transition: background-color 0.3s ease, color 0.3s ease;
+    color-scheme: light dark;
+    background-color: hsl(var(--background));
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   body {
     font-family: 'DM Sans', sans-serif;
-    background-color: #090a14;
-    background-image:
-      radial-gradient(circle at 12% 8%, rgba(124,106,247,0.18), transparent 18%),
-      radial-gradient(circle at 85% 14%, rgba(45,212,191,0.12), transparent 16%),
-      radial-gradient(circle at 22% 85%, rgba(245,158,11,0.10), transparent 20%),
-      repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 22px),
-      repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 22px),
-      linear-gradient(180deg, rgba(3,6,14,0.92), rgba(8,10,18,0.98));
-    background-attachment: fixed;
-    background-size: cover;
-    background-blend-mode: screen, overlay, normal;
+    min-height: 100vh;
+    margin: 0;
+    background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-
-  .light body {
-    background-color: #f8f8fa;
-    background-image:
-      radial-gradient(circle at 12% 8%, rgba(124,106,247,0.08), transparent 18%),
-      radial-gradient(circle at 85% 14%, rgba(45,212,191,0.06), transparent 16%),
-      radial-gradient(circle at 22% 85%, rgba(245,158,11,0.05), transparent 20%),
-      repeating-linear-gradient(90deg, rgba(0,0,0,0.02) 0, rgba(0,0,0,0.02) 1px, transparent 1px, transparent 22px),
-      repeating-linear-gradient(0deg, rgba(0,0,0,0.02) 0, rgba(0,0,0,0.02) 1px, transparent 1px, transparent 22px),
-      linear-gradient(180deg, rgba(248,248,250,0.98), rgba(252,252,254,0.99));
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   h1, h2, h3, h4, h5, h6, label, .font-mono {
