@@ -1,0 +1,62 @@
+# Node modules
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/build/
+**/.next/
+**/.turbo/
+**/out/
+
+# Dependency directories
+/EvoSphere-Backend/node_modules/
+/EvoSphere-Frontend/node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+```
+# Local env files
+.env
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs_analysis.dat
+*.njsproj
+*.sln
+*.swp
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# Misc
+*.local
+*.cache
+
+# Prisma
+prisma/dev.db
+prisma/.env
+
+# Vite / frontend
+EvoSphere-Frontend/dist/
+EvoSphere-Frontend/.vite/
+EvoSphere-Frontend/.cache/
+
+# Root markdown files
+/*.md
+
+EvoSphere-Frontend/.env/
+EvoSphere-Backend/.env/

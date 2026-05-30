@@ -1,0 +1,43 @@
+const express = require('express');
+const cors    = require('cors');
+
+const authRoutes   = require('./routes/auth.routes');
+const eventRoutes  = require('./routes/event.routes');
+const ticketRoutes = require('./routes/ticket.routes');
+const vendorRoutes = require('./routes/vendor.routes');
+const orderRoutes  = require('./routes/order.routes');
+
+const app = express();
+
+// ─── Middleware ────────────────────────────────────────────────────────────────
+if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
+  console.error('❌ FRONTEND_URL must be set in production');
+  process.exit(1);
+}
+
+app.use(cors({
+  origin: true,  // Allow any origin in development
+  credentials: true,
+}));
+app.use(express.json());
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+app.use('/api/auth',    authRoutes);
+app.use('/api/events',  eventRoutes);
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/vendors', vendorRoutes);
+app.use('/api/orders',  orderRoutes);
+
+// ─── Health check ─────────────────────────────────────────────────────────────
+app.get('/health', (_req, res) => res.json({ status: 'ok', project: 'EventSphere' }));
+
+// ─── 404 ──────────────────────────────────────────────────────────────────────
+app.use((_req, res) => res.status(404).json({ message: 'Route not found' }));
+
+// ─── Global error handler ─────────────────────────────────────────────────────
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ message: err.message || 'Internal server error' });
+});
+
+module.exports = app;

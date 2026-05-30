@@ -1,0 +1,252 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+}
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+
+enum Role {
+  HOST
+  CLIENT
+  VENDOR
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum TicketStatus {
+  UNUSED
+  USED
+  EXPIRED
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ─────────────────────────────────────────
+// USERS
+// One table for all roles (Host / Client / Vendor).
+// A user picks their role at signup and it is fixed.
+// ─────────────────────────────────────────
+
+model User {
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(100)
+  email          String   @unique @db.VarChar(150)
+  passwordHash   String   @db.VarChar(255)
+  role           Role
+  phone          String?  @db.VarChar(20)
+  profilePicUrl  String?  @db.VarChar(500)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  hostedEvents        Event[]
+  orders              Order[]
+  vendorProfile       VendorProfile?
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────
+// EVENTS
+// Created and owned by a Host.
+// Status flows: DRAFT → PUBLISHED → ONGOING → COMPLETED / CANCELLED
+// ─────────────────────────────────────────
+
+model Event {
+  id          Int         @id @default(autoincrement())
+  hostId      Int
+  name        String      @db.VarChar(200)
+  description String?     @db.Text
+  venue       String      @db.VarChar(300)
+  eventDate   DateTime
+  capacity    Int
+  status      EventStatus @default(DRAFT)
+  bannerUrl   String?     @db.VarChar(500)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  host                User                  @relation(fields: [hostId], references: [id])
+  ticketTypes         TicketType[]
+  vendorApplications  VendorApplication[]
+  vendorProducts VendorProduct[]
+
+  @@index([hostId])
+  @@index([status])
+  @@map("events")
+}
+
+// ─────────────────────────────────────────
+// TICKET TYPES
+// A host defines pricing tiers per event.
+// e.g. "General ₹299"  or  "VIP ₹799"
+// ─────────────────────────────────────────
+
+model TicketType {
+  id            Int       @id @default(autoincrement())
+  eventId       Int
+  label         String    @db.VarChar(100)   // "General", "VIP", "Student"
+  price         Decimal   @db.Decimal(10, 2)
+  totalQuantity Int
+  soldCount     Int       @default(0)        // incremented on every paid order
+  saleEndsAt    DateTime?
+
+  // Relations
+  event   Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  orders  Order[]
+
+  @@index([eventId])
+  @@map("ticket_types")
+}
+
+// ─────────────────────────────────────────
+// ORDERS
+// One order per checkout session.
+// A client can buy multiple tickets (quantity > 1) in one order.
+// Hook your payment gateway (Razorpay etc.) to paymentStatus.
+// ─────────────────────────────────────────
+
+model Order {
+  id            Int           @id @default(autoincrement())
+  clientId      Int
+  ticketTypeId  Int
+  quantity      Int           @default(1)
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  paymentStatus PaymentStatus @default(PENDING)
+  orderedAt     DateTime      @default(now())
+
+  // Relations
+  client     User       @relation(fields: [clientId], references: [id])
+  ticketType TicketType @relation(fields: [ticketTypeId], references: [id])
+  tickets    Ticket[]
+
+  @@index([clientId])
+  @@index([ticketTypeId])
+  @@map("orders")
+}
+
+// ─────────────────────────────────────────
+// TICKETS
+// One row = one physical ticket.
+// qrCodeData is the unique string encoded into the QR image.
+// Your Java ZXing service generates the image from this value.
+// On scan: look up qrCodeData, check status = UNUSED and expiresAt > now(),
+// then set status = USED and usedAt = now().
+// ─────────────────────────────────────────
+
+model Ticket {
+  id          Int          @id @default(autoincrement())
+  orderId     Int
+  qrCodeData  String       @unique @db.VarChar(500) // UUID or signed JWT
+  status      TicketStatus @default(UNUSED)
+  usedAt      DateTime?
+  expiresAt   DateTime?
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([qrCodeData])
+  @@map("tickets")
+}
+
+// ─────────────────────────────────────────
+// VENDOR PROFILES
+// Vendor-specific business details, separate from the User table.
+// One user (role = VENDOR) has exactly one VendorProfile.
+// ─────────────────────────────────────────
+
+model VendorProfile {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  businessName String   @db.VarChar(200)
+  category     String   @db.VarChar(100)  // "Food", "Clothing", "Handicrafts" etc.
+  bio          String?  @db.Text
+  logoUrl      String?  @db.VarChar(500)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user         User                @relation(fields: [userId], references: [id])
+  applications VendorApplication[]
+  products     VendorProduct[]
+
+  @@map("vendor_profiles")
+}
+
+// ─────────────────────────────────────────
+// VENDOR APPLICATIONS
+// Vendors apply to events; Hosts approve or reject.
+// status flows: PENDING → APPROVED / REJECTED
+// ─────────────────────────────────────────
+
+model VendorApplication {
+  id          Int               @id @default(autoincrement())
+  vendorId    Int               // FK → VendorProfile
+  eventId     Int
+  message     String?           @db.Text  // vendor's pitch to the host
+  status      ApplicationStatus @default(PENDING)
+  appliedAt   DateTime          @default(now())
+  reviewedAt  DateTime?
+
+  // Relations
+  vendor VendorProfile @relation(fields: [vendorId], references: [id])
+  event  Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, eventId])  // a vendor can only apply once per event
+  @@index([eventId])
+  @@index([vendorId])
+  @@map("vendor_applications")
+}
+
+// ─────────────────────────────────────────
+// VENDOR PRODUCTS
+// A vendor's product catalog scoped to a specific event.
+// The same vendor can list different items at different events.
+// Clients browsing an event see all products from APPROVED vendors.
+// ─────────────────────────────────────────
+
+model VendorProduct {
+  id          Int      @id @default(autoincrement())
+  vendorId    Int
+  eventId     Int
+  name        String   @db.VarChar(200)
+  description String?  @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl    String?  @db.VarChar(500)
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  vendor VendorProfile @relation(fields: [vendorId], references: [id])
+  event  Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId, eventId])
+  @@map("vendor_products")
+}
